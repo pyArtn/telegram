@@ -1,3 +1,6 @@
+import json
+
+from redis_file import r
 from database import db
 
 
@@ -8,20 +11,30 @@ class Student:
     @staticmethod
     def get_students():
         sql = 'SELECT id,fullname FROM students'
+        redis_result = r.get_value(['get_students'])
         try:
-            db.cursor.execute(sql)
-            result = db.cursor.fetchall()
-            return result
+            if redis_result is not None:
+                return redis_result
+            else:
+                db.cursor.execute(sql)
+                result = db.cursor.fetchall()
+                r.add_key('get_students', result)
+                return result
         except Exception as ex:
             print(ex)
 
     @staticmethod
     def get_student_info(id):
-        sql = f' SELECT * FROM students WHERE id = {id}'
+        sql = f'SELECT * FROM students WHERE id = {id}'
+        redis_result = r.get_value([f"get_student_info:{id}"])
         try:
-            db.cursor.execute(sql)
-            result = db.cursor.fetchone()
-            return result
+            if redis_result is not None:
+                return redis_result
+            else:
+                db.cursor.execute(sql)
+                result = db.cursor.fetchone()
+                r.add_key(f"get_student_info:{id}", result)
+                return result
         except Exception as ex:
             print(ex)
 
@@ -50,7 +63,6 @@ class Student:
             return db.cursor.fetchall()
         except Exception as ex:
             print(ex)
-
 
 
 student = Student()

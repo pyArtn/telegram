@@ -15,3 +15,5 @@ ydl_opts = {
     }],
     'forceurl': True,
 }
+port_for_redis = '6379'
+decode_response = True
